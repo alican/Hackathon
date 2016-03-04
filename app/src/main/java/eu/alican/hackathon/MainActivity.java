@@ -1,15 +1,40 @@
 package eu.alican.hackathon;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import eu.alican.hackathon.adapter.FlightListAdapter;
+import eu.alican.hackathon.api.FraportClient;
+import eu.alican.hackathon.api.ServiceGenerator;
+import eu.alican.hackathon.models.Flight;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
+
+
+
+    FraportClient client;
+    Button button;
+    ListView flightListView;
+    FlightListAdapter flightListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +51,30 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+
+        flightListView = (ListView) findViewById(R.id.listView);
+        flightListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
+
+        button = (Button) findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFlights();
+
+            }
+        });
+
+        client = ServiceGenerator.createService(FraportClient.class, ServiceGenerator.FRAPORT_AUTHKEY);
+
     }
 
     @Override
@@ -49,4 +98,37 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
+    void getFlights(){
+
+        Call<ArrayList<Flight>> call = client.flights("LH", "202");
+
+
+        call.enqueue(new Callback<ArrayList<Flight>>() {
+            @Override
+            public void onResponse(Call<ArrayList<Flight>> call, Response<ArrayList<Flight>> response) {
+                if (response.isSuccess()) {
+
+                    ArrayList<Flight> flights = response.body();
+
+                    flightListAdapter = new FlightListAdapter(MainActivity.this, flights);
+                    flightListView.setAdapter(flightListAdapter);
+
+                } else {
+                  //  Log.d("Flug: ", response.message());
+                    // error response, no access to resource?
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<Flight>> call, Throwable t) {
+                // something went completely south (like no internet connection)
+               // Log.d("Error", t.getMessage());
+            }
+
+        });
+
+    }
+
 }
