@@ -5,4 +5,6 @@
     <string name="title_activity_login">Login</string>
     <string name="action_login">Login-In</string>
     <string name="title_activity_stage">Info</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_bags">BagsActivity</string>
 </resources>
