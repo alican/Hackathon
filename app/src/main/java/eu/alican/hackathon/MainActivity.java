@@ -12,12 +12,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import eu.alican.hackathon.adapter.FlightListAdapter;
 import eu.alican.hackathon.api.FraportClient;
@@ -30,8 +33,8 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity {
 
 
+    EditText editText;
 
-    FraportClient client;
     Button button;
     ListView flightListView;
     FlightListAdapter flightListAdapter;
@@ -43,21 +46,13 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
-
+        editText = (EditText) findViewById(R.id.flightnumber);
         flightListView = (ListView) findViewById(R.id.listView);
         flightListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+                Intent intent = new Intent(MainActivity.this, InfoActivity.class);
                 startActivity(intent);
             }
         });
@@ -68,12 +63,32 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFlights();
+                String input = editText.getText().toString();
+
+                if (!input.equals("")){
+
+
+                    String re1="((?:[a-z][a-z]+))";	// Word 1
+                    String re2="(\\d+)";	// Integer Number 1
+
+                    Pattern p = Pattern.compile(re1+re2,Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+                    Matcher m = p.matcher(input);
+                    if (m.find())
+                    {
+                        String w1 =m.group(1);
+                        String w2 =m.group(2);
+
+                        getFlights(w1.toUpperCase(), w2);
+
+                    }
+
+                }
+
+
 
             }
         });
 
-        client = ServiceGenerator.createService(FraportClient.class, ServiceGenerator.FRAPORT_AUTHKEY);
 
     }
 
@@ -100,9 +115,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    void getFlights(){
-
-        Call<ArrayList<Flight>> call = client.flights("LH", "202");
+    void getFlights(String w1, String w2){
+        FraportClient client = ServiceGenerator.createService(FraportClient.class, ServiceGenerator.FRAPORT_AUTHKEY);
+        Call<ArrayList<Flight>> call = client.flights(w1, w2);
 
 
         call.enqueue(new Callback<ArrayList<Flight>>() {

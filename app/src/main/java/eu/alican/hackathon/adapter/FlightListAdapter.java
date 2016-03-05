@@ -33,7 +33,7 @@ public class FlightListAdapter extends ArrayAdapter<Flight> {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.flight_item, parent, false);
         }
         TextView departure_datetime = (TextView) convertView.findViewById(R.id.departure_datetime);
-        departure_datetime.setText(flight.flight.getDepartureTime());
+        departure_datetime.setText(flight.flight.getDepartureTime().toString());
 
         return convertView;
     }

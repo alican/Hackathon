@@ -1,5 +1,7 @@
 package eu.alican.hackathon.models;
 
+import java.util.Date;
+
 /**
  * Project: Hackathon
  * Created by alican on 04.03.2016.
@@ -7,6 +9,12 @@ package eu.alican.hackathon.models;
 public class Flight {
 
     public Data flight;
+
+
+    public String getFlightLetter(){
+
+        return flight.departure.gate.substring(0, 1);
+    }
 
 
     public class Data{
@@ -20,12 +28,20 @@ public class Flight {
         String arrivalAirport; // TXL
         String originDate;
 
-        Departure departure;
+        public Departure departure;
 
-        String bordingTime;
+        Date bordingTime;
 
-        public String getDepartureTime() {
+        public Date getDepartureTime() {
             return departure.scheduled;
+        }
+
+        public Date getBoardingTime(){
+            if (bordingTime != null){
+                return bordingTime;
+            }
+            return departure.scheduled;
+
         }
 
         String flightStatus;
@@ -33,12 +49,12 @@ public class Flight {
 
         public class Departure {
 
-            String scheduled;  // Format: "2016-03-04T14:00:00Z"
-            String estimated;
-            String actual;
-            int terminal;
-            String gate;
-            CheckinInfo checkinInfo;
+            public Date scheduled;  // Format: "2016-03-04T14:00:00Z"
+            public Date estimated;
+            public Date actual;
+            public int terminal;
+            public String gate;
+            public CheckinInfo checkinInfo;
         }
 
         public class CheckinInfo{

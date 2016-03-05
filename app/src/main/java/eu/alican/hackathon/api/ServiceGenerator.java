@@ -1,5 +1,8 @@
 package eu.alican.hackathon.api;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.io.IOException;
 
 import okhttp3.Interceptor;
@@ -23,11 +26,13 @@ public class ServiceGenerator {
     public static final String FRAPORT_AUTHKEY = "Bearer ba4f301cba60367e719dd76e82d1c4ee";
 
 
-
     private static Retrofit.Builder builder =
             new Retrofit.Builder()
                     .baseUrl(API_BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create());
+                    .addConverterFactory(GsonConverterFactory.create(
+                            new GsonBuilder()
+                            .setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")  //2016-03-04T14:00:00Z
+                            .create()));
 
     public static <S> S createService(Class<S> serviceClass) {
         return createService(serviceClass, null);

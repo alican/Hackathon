@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="eu.alican.hackathon.MainActivity">
+    tools:context="eu.alican.hackathon.InfoActivity"
+    android:background="@color/colorPrimary">
 
     <android.support.design.widget.AppBarLayout
         app:elevation="0dp"
@@ -23,7 +24,7 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_main" />
+    <include layout="@layout/content_info" />
 
 
 
