@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">Hackathon</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_info">InfoActivity</string>
-    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_info">Infotafel</string>
+    <string name="title_activity_login">Login</string>
     <string name="action_login">Login-In</string>
+    <string name="title_activity_stage">Info</string>
 </resources>

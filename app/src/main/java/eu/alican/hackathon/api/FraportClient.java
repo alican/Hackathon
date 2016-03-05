@@ -2,7 +2,9 @@ package eu.alican.hackathon.api;
 
 import java.util.ArrayList;
 
+import eu.alican.hackathon.models.CheckInInfo;
 import eu.alican.hackathon.models.Flight;
+import eu.alican.hackathon.models.Gate;
 import eu.alican.hackathon.models.Transittime;
 import eu.alican.hackathon.models.Waitingperiod;
 import retrofit2.Call;
@@ -37,6 +39,16 @@ public interface FraportClient {
             @Path("location1") String location1,
             @Path("location2") String location2
     );
+
+
+    @GET("api/gates/1.0/gates/{gatename}")
+    Call<ArrayList<Gate>> gateInfo(
+            @Path("gatename") String gatename);
+
+
+    @GET("/api/checkininfo/1.0/checkininfo/{airlineCode}")
+    Call<ArrayList<CheckInInfo>> checkInInfo(
+            @Path("airlineCode") String airlineCode);
 
 
 }

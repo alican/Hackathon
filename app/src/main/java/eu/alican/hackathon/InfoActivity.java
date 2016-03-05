@@ -1,12 +1,13 @@
 package eu.alican.hackathon;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -18,7 +19,9 @@ import java.util.Date;
 
 import eu.alican.hackathon.api.FraportClient;
 import eu.alican.hackathon.api.ServiceGenerator;
+import eu.alican.hackathon.models.CheckInInfo;
 import eu.alican.hackathon.models.Flight;
+import eu.alican.hackathon.models.Gate;
 import eu.alican.hackathon.models.Manager;
 import eu.alican.hackathon.models.Transittime;
 import eu.alican.hackathon.models.Waitingperiod;
@@ -49,6 +52,11 @@ public class InfoActivity extends AppCompatActivity {
 
         contentContainer = (LinearLayout) findViewById(R.id.contentContainer);
 
+        View loadedView = LayoutInflater.from(InfoActivity.this)
+                .inflate(R.layout.flight_item, contentContainer, false);
+
+        contentContainer.addView(loadedView);
+
         manager = new Manager();
 
         FetchAPIData fetchAPIData = new FetchAPIData();
@@ -60,19 +68,17 @@ public class InfoActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params) {
             getFlight();
+            getGateInfo();
+            getCheckInInfo();
+
             getWaitingperiods();
 
-            String flightLetter;
+            String flightLetter= flight.getFlightLetter();
 
-            if(flight.getFlightLetter().equals("Z")){
-                flightLetter = "A";
-            }else {
-                flightLetter = flight.getFlightLetter();
-            }
-            getTransittime("Long-Distance Train Station","Check-In " + flightLetter, 0);
-            getTransittime("Check-In " + flightLetter, "Departure ID-Check " + flightLetter , 1);
-            getTransittime("Departure ID-Check " + flightLetter, "Central Security-Check " +flightLetter , 2);
-            getTransittime("Central Security-Check " + flightLetter, flightLetter + "-Gates", 3);
+            getTransittime("Long-Distance Train Station", manager.checkInInfo.getName(), 0);
+            getTransittime(manager.checkInInfo.getName(), manager.gateInfo.getDeparture_bordercheck(), 1);
+            getTransittime(manager.gateInfo.getDeparture_bordercheck(), manager.gateInfo.getDeparture_securitycheck() , 2);
+            getTransittime(manager.gateInfo.getDeparture_securitycheck(), flight.getFlightLetter() + "-Gates", 3);
             return null;
         }
 
@@ -84,6 +90,48 @@ public class InfoActivity extends AppCompatActivity {
             drawLayoutBoarding();
 
         }
+    }
+
+    private void getCheckInInfo(){
+        FraportClient client = ServiceGenerator.createService(FraportClient.class, ServiceGenerator.FRAPORT_AUTHKEY);
+        Call<ArrayList<CheckInInfo>> call = client.checkInInfo(airlineCode);
+
+        ArrayList<CheckInInfo> checkInInfos = null;
+        try{
+            checkInInfos = call.execute().body();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+        if (checkInInfos != null){
+            if (checkInInfos.size() > 0){
+                Log.wtf("CHECK", "IN");
+                manager.setCheckInInfo(checkInInfos.get(0));
+            }
+        }
+
+
+    }
+
+    private void getGateInfo(){
+        FraportClient client = ServiceGenerator.createService(FraportClient.class, ServiceGenerator.FRAPORT_AUTHKEY);
+        Call<ArrayList<Gate>> call = client.gateInfo(flight.flight.departure.gate);
+
+        ArrayList<Gate> gates = null;
+        try{
+            gates = call.execute().body();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+        if (gates != null){
+            if (gates.size() > 0){
+
+                manager.setGateInfo(gates.get(0));
+            }
+        }
+
+
     }
 
     private void getFlight(){
@@ -166,19 +214,36 @@ public class InfoActivity extends AppCompatActivity {
     private void drawLayoutBoarding(){
 
         View stage = getLayoutInflater().inflate(R.layout.stage, null);
-        View v = getLayoutInflater().inflate(R.layout.footwalk, contentContainer);
-        TextView walk = (TextView) v.findViewById(R.id.duration);
+
+        View loadedView = LayoutInflater.from(InfoActivity.this)
+                .inflate(R.layout.footwalk, contentContainer, false);
+
+        TextView walk = (TextView) loadedView.findViewById(R.id.duration);
+
+
         int d = manager.tSecurityToGate.path.getTransitTime();
         walk.setText(d + " Minuten");
-
+        contentContainer.addView(loadedView);
+        TextView state = (TextView) stage.findViewById(R.id.state);
+        state.setText(manager.gateInfo.getName());
         TextView time = (TextView) stage.findViewById(R.id.time);
         TextView label = (TextView) stage.findViewById(R.id.label);
         label.setText("Gate " + flight.flight.departure.gate);
 
+
         countDownStart(time, flight.flight.getBoardingTime());
 
 
+
         contentContainer.addView(stage);
+        stage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(InfoActivity.this, StageActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     private void drawLayoutSecurity(){
@@ -187,14 +252,21 @@ public class InfoActivity extends AppCompatActivity {
 
         TextView time = (TextView) stage.findViewById(R.id.time);
         TextView label = (TextView) stage.findViewById(R.id.label);
+        TextView state = (TextView) stage.findViewById(R.id.state);
+        state.setText(manager.gateInfo.getDeparture_securitycheck());
+        TextView state2 = (TextView) stage.findViewById(R.id.state2);
+        state2.setText("Wartezeit: ca " + manager.getSecurityWaiting() + "s");
         label.setText("Sicherheitskontrolle");
 
         countDownStart(time, manager.getSecurityCheckTime());
 
-        View v = getLayoutInflater().inflate(R.layout.footwalk, contentContainer);
-        TextView walk = (TextView) v.findViewById(R.id.duration);
-        int d = manager.tSecurityToGate.path.getTransitTime();
+        View loadedView = LayoutInflater.from(InfoActivity.this)
+                .inflate(R.layout.footwalk, contentContainer, false);
+
+        TextView walk = (TextView) loadedView.findViewById(R.id.duration);
+        int d = manager.tFromIDCheckToSecurity.path.getTransitTime();
         walk.setText(d + " Minuten");
+        contentContainer.addView(loadedView);
 
         contentContainer.addView(stage);
     }
@@ -205,11 +277,19 @@ public class InfoActivity extends AppCompatActivity {
 
         TextView time = (TextView) stage.findViewById(R.id.time);
         TextView label = (TextView) stage.findViewById(R.id.label);
-        label.setText("Passkontrolle (" + flight.getFlightLetter() + ")");
-
+        TextView state = (TextView) stage.findViewById(R.id.state);
+        label.setText("Passkontrolle");
+        TextView state2 = (TextView) stage.findViewById(R.id.state2);
+        state2.setText("Wartezeit: ca " + manager.getIDCheckWaiting() + "s");
+        state.setText(manager.gateInfo.getDeparture_bordercheck());
         countDownStart(time, manager.getIDCheckTime());
-        getLayoutInflater().inflate(R.layout.footwalk, contentContainer);
+        View loadedView = LayoutInflater.from(InfoActivity.this)
+                .inflate(R.layout.footwalk, contentContainer, false);
 
+        TextView walk = (TextView) loadedView.findViewById(R.id.duration);
+        int d = manager.tFromCheckinToIDCheck.path.getTransitTime();
+        walk.setText(d + " Minuten");
+        contentContainer.addView(loadedView);
         contentContainer.addView(stage);
     }
     private void drawLayoutCheckIn(){
@@ -219,12 +299,19 @@ public class InfoActivity extends AppCompatActivity {
         TextView time = (TextView) stage.findViewById(R.id.time);
         TextView label = (TextView) stage.findViewById(R.id.label);
         TextView state = (TextView) stage.findViewById(R.id.state);
+        TextView state2 = (TextView) stage.findViewById(R.id.state2);
+        state2.setText("Wartezeit: ca " + manager.getCheckInWaiting() + "s");
         label.setText("Terminal " + flight.flight.departure.terminal);
-        state.setText("Check-In " + flight.getFlightLetter());
+        state.setText(manager.checkInInfo.getName());
 
         countDownStart(time, manager.getCheckInTime());
-        getLayoutInflater().inflate(R.layout.footwalk, contentContainer); //ZUG
+        View loadedView = LayoutInflater.from(InfoActivity.this)
+                .inflate(R.layout.footwalk, contentContainer, false);
 
+        TextView walk = (TextView) loadedView.findViewById(R.id.duration);
+        int d = manager.tFromTrainStationToCheckin.path.getTransitTime();
+        walk.setText(d + " Minuten");
+        contentContainer.addView(loadedView);
         contentContainer.addView(stage);
     }
 

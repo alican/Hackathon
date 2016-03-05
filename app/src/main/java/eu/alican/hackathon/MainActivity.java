@@ -1,10 +1,12 @@
 package eu.alican.hackathon;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -50,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
 
         flightListView = (ListView) findViewById(R.id.listView);
 
-
         getCustomersAndOrdersResponse();
 
 
@@ -73,11 +74,6 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
 
-
-
-        if (id == R.id.action_settings) {
-            return true;
-        }
         if (id == R.id.login_screen) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
@@ -111,7 +107,11 @@ public class MainActivity extends AppCompatActivity {
                             intent.putExtra("Date", orderItems.get(position).getDepartureDate());
                             intent.putExtra("AirlineCode", orderItems.get(position).getAirlineCode());
                             intent.putExtra("FlightNumber", orderItems.get(position).getFlightNumber());
-                            startActivity(intent);
+
+                            ActivityOptions options = ActivityOptions
+                                    .makeSceneTransitionAnimation(MainActivity.this, view, "robot");
+
+                            startActivity(intent, options.toBundle());
                         }
                     });
 

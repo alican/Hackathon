@@ -23,7 +23,7 @@ public class ServiceGenerator {
 
     private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
 
-    public static final String FRAPORT_AUTHKEY = "Bearer ba4f301cba60367e719dd76e82d1c4ee";
+    public static final String FRAPORT_AUTHKEY = "Bearer 549521d5a7eb6eadbe24900f58a42c8a";
 
 
     private static Retrofit.Builder builder =
@@ -64,7 +64,12 @@ public class ServiceGenerator {
         OkHttpClient client = httpClient.build();
         Retrofit retrofit = builder.client(client).build();
         return retrofit.create(serviceClass);
+
+
+
     }
+
+
 
 
 }

@@ -12,6 +12,11 @@ public class Manager{
     public Flight flight;
     public ArrayList<Waitingperiod> waitingperiods;
 
+    public Gate gateInfo;
+    public CheckInInfo checkInInfo;
+
+
+
     public Transittime tFromTrainStationToCheckin;
     public Transittime tFromCheckinToIDCheck;
     public Transittime tFromIDCheckToSecurity;
@@ -26,6 +31,14 @@ public class Manager{
 
     public Manager() {
 
+    }
+
+    public void setCheckInInfo(CheckInInfo checkInInfo) {
+        this.checkInInfo = checkInInfo;
+    }
+
+    public void setGateInfo(Gate gateInfo) {
+        this.gateInfo = gateInfo;
     }
 
     public void setFlight(Flight flight) {
