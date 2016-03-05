@@ -37,9 +37,7 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity {
 
 
-    EditText editText;
 
-    Button button;
     ListView flightListView;
     LHOrderAdapter flightListAdapter;
 
@@ -50,50 +48,11 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
-        editText = (EditText) findViewById(R.id.flightnumber);
         flightListView = (ListView) findViewById(R.id.listView);
-        flightListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(MainActivity.this, InfoActivity.class);
-                startActivity(intent);
-            }
-        });
 
 
         getCustomersAndOrdersResponse();
 
-
-        button = (Button) findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String input = editText.getText().toString();
-
-                if (!input.equals("")){
-
-
-                    String re1="((?:[a-z][a-z]+))";	// Word 1
-                    String re2="(\\d+)";	// Integer Number 1
-
-                    Pattern p = Pattern.compile(re1+re2,Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-                    Matcher m = p.matcher(input);
-                    if (m.find())
-                    {
-                        String w1 =m.group(1);
-                        String w2 =m.group(2);
-
-                        getFlights(w1.toUpperCase(), w2);
-
-                    }
-
-                }
-
-
-
-            }
-        });
 
 
     }
@@ -140,8 +99,23 @@ public class MainActivity extends AppCompatActivity {
 
                     CustomersAndOrdersResponse customersAndOrdersResponse = response.body();
 
-                    flightListAdapter = new LHOrderAdapter(MainActivity.this, customersAndOrdersResponse.getOrderItems());
+                    final ArrayList<CustomersAndOrdersResponse.Content.OrderItem> orderItems = customersAndOrdersResponse.getOrderItems();
+
+                    flightListAdapter = new LHOrderAdapter(MainActivity.this, orderItems);
                     flightListView.setAdapter(flightListAdapter);
+
+                    flightListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            Intent intent = new Intent(MainActivity.this, InfoActivity.class);
+                            intent.putExtra("Date", orderItems.get(position).getDepartureDate());
+                            intent.putExtra("AirlineCode", orderItems.get(position).getAirlineCode());
+                            intent.putExtra("FlightNumber", orderItems.get(position).getFlightNumber());
+                            startActivity(intent);
+                        }
+                    });
+
+
 
 
                 } else {

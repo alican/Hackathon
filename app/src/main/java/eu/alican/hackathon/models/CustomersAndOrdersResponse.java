@@ -70,6 +70,13 @@ public class CustomersAndOrdersResponse {
                 return FlightItem.OriginDestination.Flight.Arrival.AirportCode;
             }
 
+            public String getAirlineCode(){
+                return FlightItem.OriginDestination.Flight.MarketingCarrier.AirlineID;
+            }
+            public int getFlightNumber(){
+                return FlightItem.OriginDestination.Flight.MarketingCarrier.FlightNumber;
+            }
+
 
         }
 

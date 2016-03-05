@@ -32,6 +32,9 @@ public class InfoActivity extends AppCompatActivity {
     Runnable runnable;
     Manager manager;
 
+    String date;
+    String airlineCode;
+    Integer flightNumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +42,10 @@ public class InfoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_info);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        date = getIntent().getStringExtra("Date");
+        airlineCode = getIntent().getStringExtra("AirlineCode");
+        flightNumber = getIntent().getIntExtra("FlightNumber", 0);
 
         contentContainer = (LinearLayout) findViewById(R.id.contentContainer);
 
@@ -54,10 +61,18 @@ public class InfoActivity extends AppCompatActivity {
         protected Void doInBackground(Void... params) {
             getFlight();
             getWaitingperiods();
-            getTransittime("Long-Distance Train Station","Check-In " + flight.getFlightLetter(), 0);
-            getTransittime("Check-In " + flight.getFlightLetter(), "Departure ID-Check " + flight.getFlightLetter() , 1);
-            getTransittime("Departure ID-Check " + flight.getFlightLetter(), "Central Security-Check " +flight.getFlightLetter() , 2);
-            getTransittime("Central Security-Check " + flight.getFlightLetter(), flight.getFlightLetter() + "-Gates", 3);
+
+            String flightLetter;
+
+            if(flight.getFlightLetter().equals("Z")){
+                flightLetter = "A";
+            }else {
+                flightLetter = flight.getFlightLetter();
+            }
+            getTransittime("Long-Distance Train Station","Check-In " + flightLetter, 0);
+            getTransittime("Check-In " + flightLetter, "Departure ID-Check " + flightLetter , 1);
+            getTransittime("Departure ID-Check " + flightLetter, "Central Security-Check " +flightLetter , 2);
+            getTransittime("Central Security-Check " + flightLetter, flightLetter + "-Gates", 3);
             return null;
         }
 
@@ -74,7 +89,7 @@ public class InfoActivity extends AppCompatActivity {
     private void getFlight(){
 
         FraportClient client = ServiceGenerator.createService(FraportClient.class, ServiceGenerator.FRAPORT_AUTHKEY);
-        Call<ArrayList<Flight>> call = client.flightByDate("LH", "202", "2016-03-05");
+        Call<ArrayList<Flight>> call = client.flightByDate(airlineCode, flightNumber.toString(), date);
 
         ArrayList<Flight> flights = null;
         try {
