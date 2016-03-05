@@ -22,7 +22,7 @@ public class LHServiceGenerator {
 
     private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
 
-    public static final String LH_AUTHKEY = "Bearer bgvmdmz6nn7m4f6qfadmmque\n";
+    public static final String LH_AUTHKEY = "Bearer bgvmdmz6nn7m4f6qfadmmque";
 
 
     private static Retrofit.Builder builder =
@@ -47,9 +47,9 @@ public class LHServiceGenerator {
 
                     // Request customization: add request headers
                     Request.Builder requestBuilder = original.newBuilder()
+                            .header("Accept", "application/json")
                             .header("Authorization", authToken)
                             .method(original.method(), original.body());
-
                     Request request = requestBuilder.build();
                     return chain.proceed(request);
                 }

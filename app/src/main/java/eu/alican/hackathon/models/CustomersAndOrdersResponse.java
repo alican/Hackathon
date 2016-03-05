@@ -1,14 +1,22 @@
 package eu.alican.hackathon.models;
 
+import java.util.ArrayList;
+
 /**
  * Project: Hackathon
  * Created by alican on 05.03.2016.
  */
 public class CustomersAndOrdersResponse {
 
-    Data CustomersAndOrdersResponse;
+    Content CustomersAndOrdersResponse;
 
-    public class Data{
+
+    public ArrayList<Content.OrderItem> getOrderItems(){
+
+        return CustomersAndOrdersResponse.Orders.Order.OrderItems.OrderItem;
+    }
+
+    public class Content {
 
         Customers Customers;
         Orders Orders;
@@ -26,7 +34,7 @@ public class CustomersAndOrdersResponse {
 
             Name Name;
             String Gender;
-            String ProfileID;
+           // String ProfileID;
 
         }
 
@@ -36,11 +44,33 @@ public class CustomersAndOrdersResponse {
         }
 
         public class OrderItems{
-            OrderItem[] OrderItem;
+            ArrayList<OrderItem> OrderItem;
         }
 
         public class OrderItem{
             FlightItem FlightItem;
+
+            public String getDepartureDate(){
+                return FlightItem.OriginDestination.Flight.Departure.Date;
+            }
+            public String getArrivalDate(){
+                return FlightItem.OriginDestination.Flight.Arrival.Date;
+            }
+
+            public String getDepartureTime(){
+                return FlightItem.OriginDestination.Flight.Departure.Time;
+            }
+            public String getArrivalTime(){
+                return FlightItem.OriginDestination.Flight.Arrival.Time;
+            }
+            public String getDepartureCode(){
+                return FlightItem.OriginDestination.Flight.Departure.AirportCode;
+            }
+            public String getArrivalCode(){
+                return FlightItem.OriginDestination.Flight.Arrival.AirportCode;
+            }
+
+
         }
 
         public class FlightItem{
@@ -53,7 +83,8 @@ public class CustomersAndOrdersResponse {
         public class Flight{
             String SegmentKey;
             Departure Departure;
-            Arrival Arival;
+            Arrival Arrival;
+            BaggageItem BaggageItem;
             MarketingCarrier MarketingCarrier;
         }
 
@@ -73,7 +104,6 @@ public class CustomersAndOrdersResponse {
             String AirlineID;
             int FlightNumber;
             SeatItem SeatItem;
-            BaggageItem BaggageItem;
         }
 
         public class SeatItem{

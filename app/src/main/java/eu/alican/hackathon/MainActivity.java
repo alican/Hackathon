@@ -23,8 +23,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import eu.alican.hackathon.adapter.FlightListAdapter;
+import eu.alican.hackathon.adapter.LHOrderAdapter;
 import eu.alican.hackathon.api.FraportClient;
+import eu.alican.hackathon.api.LHServiceGenerator;
+import eu.alican.hackathon.api.LufthansaClient;
 import eu.alican.hackathon.api.ServiceGenerator;
+import eu.alican.hackathon.models.CustomersAndOrdersResponse;
 import eu.alican.hackathon.models.Flight;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -37,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
     Button button;
     ListView flightListView;
-    FlightListAdapter flightListAdapter;
+    LHOrderAdapter flightListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        getCustomersAndOrdersResponse();
 
 
         button = (Button) findViewById(R.id.button);
@@ -107,12 +113,58 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
+
+
+
         if (id == R.id.action_settings) {
             return true;
         }
-
+        if (id == R.id.login_screen) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+        }
         return super.onOptionsItemSelected(item);
     }
+
+
+
+    void getCustomersAndOrdersResponse(){
+
+        LufthansaClient client = LHServiceGenerator.createService(LufthansaClient.class, LHServiceGenerator.LH_AUTHKEY);
+        Call<CustomersAndOrdersResponse> call =  client.customersAndOrdersResponse("cust_006");
+
+        call.enqueue(new Callback<CustomersAndOrdersResponse>() {
+            @Override
+            public void onResponse(Call<CustomersAndOrdersResponse> call, Response<CustomersAndOrdersResponse> response) {
+                if (response.isSuccess()) {
+
+                    CustomersAndOrdersResponse customersAndOrdersResponse = response.body();
+
+                    flightListAdapter = new LHOrderAdapter(MainActivity.this, customersAndOrdersResponse.getOrderItems());
+                    flightListView.setAdapter(flightListAdapter);
+
+
+                } else {
+                    Log.wtf("Nicht", "GUT");
+
+                    //  Log.d("Flug: ", response.message());
+                    // error response, no access to resource?
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CustomersAndOrdersResponse> call, Throwable t) {
+                Log.wtf("Ohh", "shit");
+
+                // something went completely south (like no internet connection)
+                Log.wtf("Error", t.getMessage());
+            }
+
+        });
+
+
+    }
+
 
 
     void getFlights(String w1, String w2){
@@ -127,8 +179,6 @@ public class MainActivity extends AppCompatActivity {
 
                     ArrayList<Flight> flights = response.body();
 
-                    flightListAdapter = new FlightListAdapter(MainActivity.this, flights);
-                    flightListView.setAdapter(flightListAdapter);
 
                 } else {
                   //  Log.d("Flug: ", response.message());
